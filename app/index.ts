@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import connectDB from "./connection/database.ts";
-import { router } from "./routes/itemsRoute.ts";
+import { router } from "./routes/user.routes.ts";
 
 const app = express();
 connectDB()
