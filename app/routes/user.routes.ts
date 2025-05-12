@@ -1,35 +1,35 @@
 import express from "express";
 import { Request, Response } from "express";
 import User from "../models/user.model.ts";
+import { uploadAvatar } from "../controller/user.controller.ts";
+import { upload } from "../middleware/upload.middleware.ts";
 import { response } from "../res/res.ts";
 
-export const router = express.Router();
+export const userRouter = express.Router();
 
-router.post("/", async (req: Request, res: Response) => {
-  const items = await User.create(req.body);
-  return response(201, items, "Created Succes", res);
-});
+// Post
+userRouter.post("/:id/avatar", upload.single('avatar'), uploadAvatar);
  
 // Read All
-router.get("/", async (req: Request, res: Response) => {
+userRouter.get("/", async (req: Request, res: Response) => {
   const items = await User.find().select("name age email")
   return response(200, items, "Succes", res);
 });
 
 // Read One
-router.get("/:id", async (req: Request, res: Response) => {
+userRouter.get("/:id", async (req: Request, res: Response) => {
   const items = await User.findById(req.body.id);
   return response(200, items, "Succes", res)
 });
 
 // Update
-router.patch("/:id", async (req: Request, res: Response) => {
+userRouter.patch("/:id", async (req: Request, res: Response) => {
   const items = await User.findByIdAndUpdate(req.body.id, { new: true });
   return response(200, items, "Updated Succes", res)
 });
 
 // Delete
-router.delete("/:id", async (req: Request, res: Response) => {
+userRouter.delete("/:id", async (req: Request, res: Response) => {
   await User.findByIdAndDelete(req.body.id);
   return response(204, null, "Deleted Succes", res)
 });
