@@ -12,7 +12,7 @@ export const authenticationToken = (req: Request, res: Response) => {
     }
 
     // token jwt verify
-    jwt.verify(token, JWT_SECRET, (error: Error, user: { name: string }) => {
+    jwt.verify(token, JWT_SECRET, (error: Error, user: { name: string } ) => {
       if (error) {
         return response(403, { Success: false }, "Forbidden", res)
       }

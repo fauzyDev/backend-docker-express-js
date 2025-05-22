@@ -1,25 +1,22 @@
 import { Request, Response } from "express";
-import { generateOtp } from "../utils/generateOtp.ts";
-import { OTP_EXPIRY } from "../config/env.ts";
-import User from "../models/user.model.ts";
-import Otp from "../models/otp.model.ts";
 import { response } from "../res/res.ts";
+import { generateSaveOtp } from "../services/otp.service.ts";
+import { OTP_EXPIRY } from "../config/env.ts";
+import { sendOtpEmail } from "../services/email.service.ts";
+import { userCreate } from "../services/auth.service.ts";
+import { verifyOtp } from "../services/otp.service.ts";
 
 export const register = async (req: Request, res: Response) => {
     const { name, age, email, password } = req.body;
-    const user = await User.create({ name, age, email, password });
-    const otp = generateOtp();
-    await Otp.create({ email, otp, expiresAt: new Date(Date.now() + OTP_EXPIRY) })
-    return response(201, user, "Created Succes", res)
+    await userCreate(name, age, email, password);
+    const otp = await generateSaveOtp(email, OTP_EXPIRY)
+    await sendOtpEmail(email, otp);
+    return response(201, { data: "Created Succes" }, "Send OTP sucessfully", res)
 }
 
-export const verifyOtp = async (req: Request, res: Response) => {
+export const verify = async (req: Request, res: Response) => {
     const { email, code } = req.body;
-    const record = await Otp.findOne({ email, code });
-    if (!record || record.expiresAt < new Date()) {
-        return response(404, null, "Kode telah expire", res);
-    }
-    await User.findOneAndUpdate({ email }, { isVerified: true });
-    await Otp.deleteMany({ email });
+    const isValid = await verifyOtp(email, code);
+    if (!isValid) return response(400, null, "OTP invalid / expired", res);
     return response(200, null, "Email Verified", res)
 }
